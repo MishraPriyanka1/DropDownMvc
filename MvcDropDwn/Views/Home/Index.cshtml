@@ -1,0 +1,147 @@
+﻿@model MvcDropDwn.Models.TournamentList 
+@*Model of TournamentList is declared using razor view engine*@
+
+
+<h2>Index</h2>
+<meta http-equiv="X-UA-Compatible" content="IE=9,chrome=1" />
+<script src="../../Scripts/modernizr-2.5.3.js" type="text/javascript"></script> 
+<script src="../../Scripts/jquery-2.1.1.min.js" type="text/javascript"></script>
+
+
+<div>
+    <div>
+        Tournament  @*label*@
+@*binding the object returned from controller to view using modelfor display in browser SelectList is a function that has overloaded parameters *@
+    @Html.DropDownListFor(model => model.tournamentList, new SelectList(
+              Model.tournamentList,
+              "tournamentId",
+              "tournamentName"), "Select Tournament", new { id = "ddlTournament" })
+    </div>
+    @*Binding the dropdownlist Team to the view*@
+    <div>Team @Html.DropDownList("ddlTeam", new SelectList(new List<SelectListItem>() { new SelectListItem() }), "Select Team", new { id = "ddlTeam" })</div>
+     @*Binding the dropdownlist Player to the view*@
+    <div>Player @Html.DropDownList("ddlPlayer", new SelectList(new List<SelectListItem>() { new SelectListItem() }), "Select Player", new { id = "ddlPlayer" })</div>
+
+</div>
+<div>
+     @*submit button *@
+    <input type="submit" id="btnSubmit" value="submit" />
+    @*onclick="display()"*@
+    <label id="lblDisplay"></label>
+
+</div>
+
+<style>
+    #ddlTeam {
+        width: 130px;
+        margin-left: 84px;
+    }
+
+    #ddlPlayer {
+        width: 130px;
+        margin-left: 79px;
+    }
+
+    #ddlTournament {
+        width: 130px;
+        margin-left: 45px;
+    }
+
+    #submit {
+        margin-left: 5.3cm;
+    }
+</style>
+
+
+<script type="text/javascript">
+
+    @*jquery for the dropdown list of team   *@
+    $(document).ready(function () {
+        @*on change event when Tournament dropdownlist*@
+        $("#ddlTournament").change(function () {
+@*The tournament value selected is stored in a variable name*@
+            var name = $("#ddlTournament option:selected").text();
+            
+            @*view is redirected from home to the team*@
+            var url = 'Home/Team';
+            @*The name containing the value of selected tournament has an id name and is stored in data1 variable*@
+            var data1 = { "name": name };
+            // $.post(url, data1, function (data) {
+            @*ajax request to post the data to the server with predefined values of ajax*@
+            $.ajax({
+                type: "POST",
+                url: url,
+                datatype: 'json',
+                data: data1,
+                @*on successful retrieval of data*@
+                success: function (data) {
+                    @* The items are stored in array*@
+                    var items = [];
+                    @*Before displaying the corresponding team list select team option is displayed *@
+                    items.push("<option value=" + 0 + ">" + "Select Team" + "</option>");
+                    @*the data retrieved is iterated to the length of data retrieved *@
+                    for (var i = 0; i < data.length; i++) {
+                        debugger;
+                        items.push("<option value=" + data[i].teamId + ">" + data[i].teamName + "</option>");
+                    }
+                    @*the team list is populated using the join method*@
+                    $("#ddlTeam").html(items.join(' '));
+                },
+                error: function () {
+                    alert("ERROR");
+                }
+            });
+        });
+        @*On change team element function is fired*@
+
+        $("#ddlTeam").change(function () {
+            @*the team value selected is stored in name*@
+            var name = $("#ddlTeam option:selected").text();
+            @*redirected from home controller to the player*@
+            var url = 'Home/Player';
+            @*the name variable has an id name that is stored in data1*@
+            var data1 = { "name": name };
+            @*Postback property used*@
+            $.post(url, data1, function (data) {
+                var items = [];
+                debugger;
+                items.push("<option value=" + 0 + ">" + "Select Player" + "</option>");
+                for (var i = 0; i < data.length; i++) {
+                    items.push("<option value=" + data[i].playerId + ">" + data[i].playerName + "</option>");
+                }
+                @*Player dropdownlist is populated*@
+                $("#ddlPlayer").html(items.join(' '));
+            });
+        });
+    });
+    @*Jquery to display the values of three dropdownlist in a label when submit button is clicked*@
+    $("#btnSubmit").on("click", function () {
+        @*Selected value of Tournament dropdownlist is stored in  variablestrTournament*@
+        var strTournament = $("#ddlTournament option:selected").text();
+        @*Selected value of Team dropdownlist is stored in  variable*@
+        var strTeam = $("#ddlTeam option:selected").text();
+        @*Selected value of Player dropdownlist is stored in  variable*@
+        var strPlayer = $("#ddlPlayer option:selected").text();
+        @*String is concatenated and stored in a variable strAll*@
+        var strAll = "You have selected the Tournament: " + strTournament + " Team: " + strTeam + " Player: " + strPlayer;
+        @*To change the value of label .html property is used and strAll is the input*@
+        $("#lblDisplay").html(strAll);
+
+    });
+
+
+
+    function display() {
+        var e = document.getElementById("ddlTournament");
+        var strTournament = e.options[e.selectedIndex].text;
+        // alert( strUser);
+        var f = document.getElementById("ddlTeam");
+        var strTeam = f.options[f.selectedIndex].text;
+        var g = document.getElementById("ddlPlayer");
+        var strPlayer = g.options[g.selectedIndex].text;
+        var strAll = "You have selected the Tournament: " + strTournament + " Team: " + strTeam + " Player: " + strPlayer;
+
+        document.getElementById("lblDisplay").innerHTML = strAll;
+    }
+</script>
+
